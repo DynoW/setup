@@ -43,3 +43,16 @@
     opts: "auto,permissions,uid={{ user_uid }},gid={{ user_gid }},dmask=007,fmask=117,nofail"
     state: present
   notify: Remount NTFS partition
+
+- name: Ensure gtk-3.0 config directory exists
+  ansible.builtin.file:
+    path: "{{ user_home }}/.config/gtk-3.0"
+    state: directory
+    mode: '0755'
+
+- name: Add shared mount point to GTK bookmarks
+  ansible.builtin.lineinfile:
+    path: "{{ user_home }}/.config/gtk-3.0/bookmarks"
+    line: "file://{{ mount_point }} {{ partition_label }}"
+    create: true
+    mode: '0644'
