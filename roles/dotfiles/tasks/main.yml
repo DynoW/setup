@@ -1,0 +1,54 @@
+---
+- name: Ensure .ssh directory exists
+  ansible.builtin.file:
+    path: "{{ user_home }}/.ssh"
+    state: directory
+    owner: "{{ target_user }}"
+    group: "{{ target_user }}"
+    mode: '0700'
+  become: true
+  become_user: "{{ target_user }}"
+
+- name: Generate SSH key pair for GitHub
+  community.crypto.openssh_keypair:
+    path: "{{ user_home }}/.ssh/id_fedora_github"
+    type: rsa
+    size: 4096
+    state: present
+    owner: "{{ target_user }}"
+    mode: '0600'
+  become: true
+  become_user: "{{ target_user }}"
+  notify:
+    - Prompt for github key
+
+- name: Clone dotfiles repository
+  ansible.builtin.git:
+    repo: 'git@github.com:DynoW/dotfiles.git'
+    dest: '{{ user_home }}/dotfiles'
+    version: main
+    accept_hostkey: true
+    key_file: "{{ user_home }}/.ssh/id_fedora_github"
+    force: true
+  become: true
+  become_user: "{{ target_user }}"
+
+- name: Stow configurations
+  ansible.builtin.command: "stow {{ item.package }}"
+  args:
+    chdir: "{{ user_home }}/dotfiles"
+    creates: "{{ item.creates }}"
+  loop:
+    - { package: 'ghostty', creates: "{{ user_home }}/.config/ghostty" }
+    - { package: 'zsh', creates: "{{ user_home }}/.zshrc" }
+    - { package: 'posh', creates: "{{ user_home }}/.poshthemes/zen.toml" }
+  become: true
+  become_user: "{{ target_user }}"
+
+- name: Include Firefox tasks
+  ansible.builtin.include_tasks:
+    file: firefox.yml
+
+- name: Include Grub tasks
+  ansible.builtin.include_tasks:
+    file: grub.yml

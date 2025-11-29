@@ -1,0 +1,52 @@
+- name: Setup desktop images
+  become: true
+  become_user: "{{ target_user }}"
+  block:
+    - name: Ensure local backgrounds directory exists
+      ansible.builtin.file:
+        path: "{{ user_home }}/.local/share/backgrounds"
+        state: directory
+        owner: "{{ target_user }}"
+        group: "{{ target_user }}"
+        mode: '0755'
+
+    - name: Copy desktop background image
+      ansible.builtin.copy:
+        src: "{{ user_home }}/dotfiles/images/cat-paw.png"
+        dest: "{{ user_home }}/.local/share/backgrounds/cat-paw.png"
+        owner: "{{ target_user }}"
+        group: "{{ target_user }}"
+        mode: '0644'
+        remote_src: true
+
+    - name: Set desktop background (Light)
+      community.general.dconf:
+        key: "/org/gnome/desktop/background/picture-uri"
+        value: "'file://{{ user_home }}/.local/share/backgrounds/cat-paw.png'"
+        state: present
+
+    - name: Set desktop background (Dark)
+      community.general.dconf:
+        key: "/org/gnome/desktop/background/picture-uri-dark"
+        value: "'file://{{ user_home }}/.local/share/backgrounds/cat-paw.png'"
+        state: present
+
+- name: Setup User Login Icon
+  become: true
+  block:
+    - name: Copy user icon to AccountsService
+      ansible.builtin.copy:
+        src: "{{ user_home }}/dotfiles/images/Dyno.png"
+        dest: "/var/lib/AccountsService/icons/{{ target_user }}"
+        owner: root
+        group: root
+        mode: '0644'
+        remote_src: true
+
+    - name: Configure user icon in AccountsService
+      community.general.ini_file:
+        path: "/var/lib/AccountsService/users/{{ target_user }}"
+        section: User
+        option: Icon
+        value: "/var/lib/AccountsService/icons/{{ target_user }}"
+        mode: '0600'

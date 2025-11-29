@@ -1,0 +1,4 @@
+---
+- name: Prompt for Logout
+  ansible.builtin.debug:
+    msg: "Please log out and log back in to apply language and keyboard changes."

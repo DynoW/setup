@@ -1,0 +1,22 @@
+---
+- name: Automated Fedora Workstation Setup
+  hosts: all
+  become: true
+  vars:
+    target_user: "{{ ansible_env.SUDO_USER | default(ansible_user_id) }}"
+    user_home: "/home/{{ target_user }}"
+    # Git conig:
+    git_user_name: "DynoW"
+    git_user_email: "104089032+DynoW@users.noreply.github.com"
+    # Partition config:
+    mount_point: "/mnt/shared"
+    partition_label: "Shared"
+    user_uid: 1000
+    user_gid: 1000
+
+  roles:
+    - core
+    - apps
+    - shell
+    - dotfiles
+    - gnome

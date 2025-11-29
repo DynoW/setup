@@ -1,0 +1,80 @@
+---
+- name: Ensure Firefox profile directory exists
+  ansible.builtin.file:
+    path: "{{ user_home }}/.mozilla/firefox"
+    state: directory
+    owner: "{{ target_user }}"
+    group: "{{ target_user }}"
+    mode: '0755'
+
+- name: Find Firefox default profile
+  ansible.builtin.find:
+    paths: "{{ user_home }}/.mozilla/firefox"
+    patterns: "*.default-release"
+    file_type: directory
+  register: dotfiles_firefox_profile
+
+- name: Copy user.js preferences into Firefox profile
+  ansible.builtin.copy:
+    src: "{{ user_home }}/dotfiles/firefox/user.js"
+    dest: "{{ dotfiles_firefox_profile.files[0].path }}/user.js"
+    owner: "{{ target_user }}"
+    group: "{{ target_user }}"
+    mode: '0644'
+  when: dotfiles_firefox_profile.matched > 0
+
+- name: Ensure chrome directory exists in Firefox profile
+  ansible.builtin.file:
+    path: "{{ dotfiles_firefox_profile.files[0].path }}/chrome"
+    state: directory
+    owner: "{{ target_user }}"
+    group: "{{ target_user }}"
+    mode: '0755'
+  when: dotfiles_firefox_profile.matched > 0
+
+- name: Copy Firefox background image
+  ansible.builtin.copy:
+    src: "{{ user_home }}/dotfiles/images/firefox.png"
+    dest: "{{ dotfiles_firefox_profile.files[0].path }}/chrome/firefox.png"
+    owner: "{{ target_user }}"
+    group: "{{ target_user }}"
+    mode: '0644'
+  when: dotfiles_firefox_profile.matched > 0
+
+- name: Create userContent.css for Firefox background
+  ansible.builtin.copy:
+    content: |
+      @-moz-document url("about:newtab"), url("about:home") {
+          body {
+              background-image: url("firefox.png") !important;
+              background-repeat: no-repeat !important;
+              background-position: center !important;
+              background-size: cover !important;
+              background-attachment: fixed !important;
+          }
+      }
+    dest: "{{ dotfiles_firefox_profile.files[0].path }}/chrome/userContent.css"
+    owner: "{{ target_user }}"
+    group: "{{ target_user }}"
+    mode: '0644'
+  when: dotfiles_firefox_profile.matched > 0
+
+# - name: Set Firefox to prefer dark theme
+#   ansible.builtin.lineinfile:
+#     path: "{{ dotfiles_firefox_profile.files[0].path }}/user.js"
+#     line: 'user_pref("ui.systemUsesDarkTheme", 1);'
+#     create: true
+#     owner: "{{ target_user }}"
+#     group: "{{ target_user }}"
+#     mode: '0644'
+#   when: dotfiles_firefox_profile.matched > 0
+
+# - name: Enable legacy stylesheets in Firefox
+#   ansible.builtin.lineinfile:
+#     path: "{{ dotfiles_firefox_profile.files[0].path }}/user.js"
+#     line: 'user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);'
+#     create: true
+#     owner: "{{ target_user }}"
+#     group: "{{ target_user }}"
+#     mode: '0644'
+#   when: dotfiles_firefox_profile.matched > 0

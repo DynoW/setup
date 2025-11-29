@@ -1,0 +1,54 @@
+---
+- name: Add Romanian standard keyboard layout to GNOME input sources
+  community.general.dconf:
+    key: /org/gnome/desktop/input-sources/sources
+    value: "[('xkb', 'us'), ('xkb', 'ro')]"
+    state: present
+  become: true
+  become_user: "{{ target_user }}"
+
+- name: Ensure base system language is en_US.UTF-8
+  ansible.builtin.lineinfile:
+    path: /etc/locale.conf
+    regexp: '^LANG='
+    line: 'LANG=en_US.UTF-8'
+    create: true
+    mode: '0644'
+    owner: root
+    group: root
+
+- name: Set LC_NUMERIC to ro_RO.UTF-8 (Number format)
+  ansible.builtin.lineinfile:
+    path: /etc/locale.conf
+    regexp: '^LC_NUMERIC='
+    line: 'LC_NUMERIC=ro_RO.UTF-8'
+    state: present
+
+- name: Set LC_TIME to ro_RO.UTF-8 (Date/Time format)
+  ansible.builtin.lineinfile:
+    path: /etc/locale.conf
+    regexp: '^LC_TIME='
+    line: 'LC_TIME=ro_RO.UTF-8'
+    state: present
+
+- name: Set LC_MONETARY to ro_RO.UTF-8 (Currency format)
+  ansible.builtin.lineinfile:
+    path: /etc/locale.conf
+    regexp: '^LC_MONETARY='
+    line: 'LC_MONETARY=ro_RO.UTF-8'
+    state: present
+
+- name: Set LC_PAPER to ro_RO.UTF-8 (Paper size format)
+  ansible.builtin.lineinfile:
+    path: /etc/locale.conf
+    regexp: '^LC_PAPER='
+    line: 'LC_PAPER=ro_RO.UTF-8'
+    state: present
+
+- name: Set LC_MEASUREMENT to ro_RO.UTF-8 (Units format)
+  ansible.builtin.lineinfile:
+    path: /etc/locale.conf
+    regexp: '^LC_MEASUREMENT='
+    line: 'LC_MEASUREMENT=ro_RO.UTF-8'
+    state: present
+  notify: Prompt for Logout

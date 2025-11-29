@@ -1,0 +1,16 @@
+---
+- name: Unassign "Focus active notification"
+  become: true
+  become_user: "{{ target_user }}"
+  community.general.dconf:
+    key: "/org/gnome/shell/keybindings/focus-active-notification"
+    value: "@as []"
+    state: present
+
+- name: Set Super+N for "Show notification list"
+  become: true
+  become_user: "{{ target_user }}"
+  community.general.dconf:
+    key: "/org/gnome/shell/keybindings/toggle-message-tray"
+    value: "@as ['<Super>n']"
+    state: present

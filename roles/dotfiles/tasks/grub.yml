@@ -1,0 +1,21 @@
+---
+- name: Check if /etc/default/grub is a symlink
+  ansible.builtin.stat:
+    path: /etc/default/grub
+  register: dotfiles_grub_stat
+
+- name: Delete /etc/default/grub if it's not a symlink
+  ansible.builtin.file:
+    path: /etc/default/grub
+    state: absent
+  when: dotfiles_grub_stat.stat.exists and not dotfiles_grub_stat.stat.islnk
+  register: dotfiles_grub_deleted
+
+- name: Stow grub configuration
+  ansible.builtin.command: stow -t / grub
+  args:
+    chdir: "{{ user_home }}/dotfiles"
+  become: true
+  when: dotfiles_grub_deleted is changed or not dotfiles_grub_stat.stat.exists
+  changed_when: true
+  notify: Generate grub configuration

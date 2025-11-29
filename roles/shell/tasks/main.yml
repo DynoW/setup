@@ -1,0 +1,38 @@
+- name: Make a temp directory for the Oh My Posh Install Script
+  ansible.builtin.file:
+    path: "{{ user_home }}/.cache/oh-my-posh"
+    state: directory
+    owner: "{{ target_user }}"
+    mode: '0755'
+  become: true
+  become_user: "{{ target_user }}"
+
+- name: Download Oh My Posh Install Script
+  ansible.builtin.get_url:
+    url: https://ohmyposh.dev/install.sh
+    dest: "{{ user_home }}/.cache/oh-my-posh/install.sh"
+    owner: "{{ target_user }}"
+    mode: '0755'
+  become: true
+  become_user: "{{ target_user }}"
+
+- name: Install Oh My Posh (User Local)
+  ansible.builtin.command: >
+    bash "{{ user_home }}/.cache/oh-my-posh/install.sh" -s -- -d "{{ user_home }}/.local/bin"
+  args:
+    creates: "{{ user_home }}/.local/bin/oh-my-posh"
+  become: true
+  become_user: "{{ target_user }}"
+
+- name: Install JetBrainMono font
+  ansible.builtin.command: >
+    "{{ user_home }}/.local/bin/oh-my-posh" font install JetBrainsMono
+  args:
+    creates: "{{ user_home }}/.local/share/fonts/jetbrainsmono-nf"
+  become: true
+  become_user: "{{ target_user }}"
+
+- name: Set Zsh as the default shell
+  ansible.builtin.user:
+    name: "{{ target_user }}"
+    shell: /usr/bin/zsh

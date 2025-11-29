@@ -1,0 +1,45 @@
+- name: Ensure ntfs-3g package is installed (required for reliable mounting)
+  ansible.builtin.dnf:
+    name: ntfs-3g
+    state: present
+
+- name: Find the device path for the partition labeled '{{ partition_label }}'
+  # Find the device path (e.g., /dev/nvme0n1p7) using the label.
+  ansible.builtin.shell: |
+    /usr/sbin/blkid -L {{ partition_label }} -o device
+  register: core_blkid_device_output
+  changed_when: false
+  failed_when: core_blkid_device_output.rc != 0 and core_blkid_device_output.stdout | length == 0
+
+- name: Check if the device path was successfully found
+  ansible.builtin.fail:
+    msg: "Device path for partition labeled '{{ partition_label }}' not found. Check the label is correct."
+  when: core_blkid_device_output.stdout | length == 0
+
+- name: Find the UUID based on the found device path
+  # Now that we have the path, we can reliably query its UUID.
+  ansible.builtin.shell: |
+    /usr/sbin/blkid -s UUID -o value {{ core_blkid_device_output.stdout | trim }}
+  register: core_blkid_uuid_output
+  changed_when: false
+
+- name: Set shared_uuid fact for use in mount task
+  ansible.builtin.set_fact:
+    core_shared_uuid: "{{ core_blkid_uuid_output.stdout | trim }}"
+
+- name: Create the mount point directory
+  ansible.builtin.file:
+    path: "{{ mount_point }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ user_uid }}"
+    group: "{{ user_gid }}"
+
+- name: Add/Update fstab entry for the NTFS partition
+  ansible.posix.mount:
+    src: "UUID={{ core_shared_uuid }}"
+    path: "{{ mount_point }}"
+    fstype: ntfs-3g
+    opts: "auto,permissions,uid={{ user_uid }},gid={{ user_gid }},dmask=007,fmask=117,nofail"
+    state: present
+  notify: Remount NTFS partition
