@@ -1,6 +1,4 @@
-# Automated System Setup with Ansible
-
-Automate setup of a fresh Fedora Workstation install with Ansible: apps, dotfiles, GNOME tweaks, shell tooling, and core repos, all reproducibly from a single playbook.
+# Automated System Setup with Ansible 🧰
 
 ## Prerequisites
 - Linux host with internet access
