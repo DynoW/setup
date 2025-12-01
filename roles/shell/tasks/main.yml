@@ -45,3 +45,7 @@
   ansible.builtin.user:
     name: "{{ target_user }}"
     shell: /usr/bin/zsh
+
+- name: Include Git tasks
+  ansible.builtin.include_tasks:
+    file: git.yml
