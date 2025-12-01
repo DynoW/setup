@@ -49,3 +49,7 @@
 - name: Include Git tasks
   ansible.builtin.include_tasks:
     file: git.yml
+
+- name: Include ssh tasks
+  ansible.builtin.include_tasks:
+    file: ssh.yml

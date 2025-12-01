@@ -25,6 +25,7 @@
       - gnome-tweaks
       - python3
       - python3-pip
+      - python3-devel
       - python3-psutil
       - ansible-lint
       - gcc
@@ -34,11 +35,19 @@
       - valgrind
     state: latest # noqa package-latest
 
-- name: Upgrade pip for system Python 3
+- name: Upgrade pip
   ansible.builtin.pip:
     name: pip
     state: latest # noqa package-latest
     executable: /usr/bin/pip3
+
+- name: Add pip packages
+  ansible.builtin.pip:
+    name:
+      - recordclass
+    state: present
+  environment:
+    PIP_BREAK_SYSTEM_PACKAGES: "1"
 
 - name: Include Mount partition tasks
   ansible.builtin.include_tasks:

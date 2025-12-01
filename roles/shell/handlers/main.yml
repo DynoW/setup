@@ -1,0 +1,21 @@
+---
+- name: Prompt for github key
+  block:
+    - name: Read the newly generated public key
+      ansible.builtin.slurp:
+        src: "{{ user_home }}/.ssh/id_fedora_github.pub"
+      register: new_pubkey_content
+      become: true
+      become_user: "{{ target_user }}"
+
+    - name: Display Public Key
+      ansible.builtin.debug:
+        msg:
+          - "********************************************************************************"
+          - "** NEW KEY GENERATED. COPY THIS KEY TO GITHUB **"
+          - "{{ new_pubkey_content['content'] | b64decode }}"
+          - "********************************************************************************"
+
+    - name: Pause for GitHub Key Addition
+      ansible.builtin.pause:
+        prompt: "Please add the key above to GitHub and press Enter..."
