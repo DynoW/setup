@@ -16,9 +16,18 @@
   become: true
   become_user: "{{ target_user }}"
 
+- name: Make the install directory for Oh My Posh
+  ansible.builtin.file:
+    path: "{{ user_home }}/.local/bin"
+    state: directory
+    owner: "{{ target_user }}"
+    mode: '0755'
+  become: true
+  become_user: "{{ target_user }}"
+
 - name: Install Oh My Posh (User Local)
   ansible.builtin.command: >
-    bash "{{ user_home }}/.cache/oh-my-posh/install.sh" -s -- -d "{{ user_home }}/.local/bin"
+    bash "{{ user_home }}/.cache/oh-my-posh/install.sh" -d "{{ user_home }}/.local/bin"
   args:
     creates: "{{ user_home }}/.local/bin/oh-my-posh"
   become: true

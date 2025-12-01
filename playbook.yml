@@ -10,7 +10,7 @@
     git_user_email: "104089032+DynoW@users.noreply.github.com"
     # Partition config:
     mount_point: "/mnt/shared"
-    partition_label: "Shared"
+    partition_label: "shared"
     user_uid: 1000
     user_gid: 1000
 

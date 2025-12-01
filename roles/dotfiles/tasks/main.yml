@@ -19,8 +19,7 @@
     mode: '0600'
   become: true
   become_user: "{{ target_user }}"
-  notify:
-    - Prompt for github key
+  notify: Prompt for github key
 
 - name: Clone dotfiles repository
   ansible.builtin.git:
